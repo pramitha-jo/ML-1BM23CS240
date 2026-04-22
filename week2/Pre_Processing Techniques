@@ -1,0 +1,145 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error,r2_score
+
+# Load California housing dataset
+housing = fetch_california_housing(as_frame=True)
+# Create DataFrame
+df = housing.frame
+# Display basic info
+df.head()
+df.shape
+df.info()
+
+df.describe()
+# Check missing values
+df.isnull().sum()
+
+plt.figure()
+sns.histplot(df["MedHouseVal"], bins=30, kde=True)
+plt.xlabel("Median House Value")
+plt.ylabel("Frequency")
+plt.title("Distribution of House Prices")
+plt.show()
+
+plt.figure()
+sns.scatterplot(x=df['MedInc'], y=df['MedHouseVal'], alpha=0.5)
+plt.xlabel("Median Income")
+plt.ylabel("Median House Value")
+plt.title("Income vs House Price")
+plt.show()
+
+plt.figure(figsize=(10,8))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+plt.title("Feature Correlation Heatmap")
+plt.show()
+
+plt.figure()
+plt.scatter(df['Longitude'], df['Latitude'], c=df['MedHouseVal'], cmap='viridis', s=5)
+
+plt.colorbar(label="House Value")
+plt.xlabel("Longitude")
+plt.ylabel("Latitude")
+plt.title("House Prices by Location")
+plt.show()
+
+df['RoomsPerHousehold'] = df['AveRooms'] / df['HouseAge']
+
+X = df.drop('MedHouseVal', axis=1)
+y = df['MedHouseVal']
+X_train, X_test, y_train, y_test = train_test_split(
+X, y, test_size=0.2, random_state=42
+)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+lin_reg = LinearRegression()
+lin_reg.fit(X_train_scaled, y_train)
+y_pred_lr = lin_reg.predict(X_test_scaled)
+rmse_lr = np.sqrt(mean_squared_error(y_test, y_pred_lr))
+mae_lr = mean_absolute_error(y_test, y_pred_lr)
+r2_lr = r2_score(y_test, y_pred_lr)
+rmse_lr, mae_lr, r2_lr
+
+dt = DecisionTreeRegressor(random_state=42)
+dt.fit(X_train, y_train)
+
+y_pred_dt = dt.predict(X_test)
+rmse_dt = np.sqrt(mean_squared_error(y_test, y_pred_dt))
+rmse_dt
+
+rf = RandomForestRegressor(random_state=42)
+rf.fit(X_train, y_train)
+y_pred_rf = rf.predict(X_test)
+rmse_rf = np.sqrt(mean_squared_error(y_test, y_pred_rf))
+rmse_rf
+
+# param_grid = {
+# 'n_estimators': [50, 100],
+# 'max_depth': [None, 10, 20],
+# 'min_samples_split&': [2, 5]
+# }
+# grid_search = GridSearchCV(rf, param_grid, cv=3,scoring='neg_mean_squared_error')
+# grid_search.fit(X_train, y_train)
+# best_model = grid_search.best_estimator_
+# y_pred_best = best_model.predict(X_test)
+# rmse_best = np.sqrt(mean_squared_error(y_test, y_pred_best))
+# rmse_best
+
+param_grid = {
+    'n_estimators': [50, 100],
+    'max_depth': [None, 10, 20],
+    'min_samples_split': [2, 5]
+}
+
+# Grid Search
+grid_search = GridSearchCV(
+    estimator=rf,
+    param_grid=param_grid,
+    cv=3,
+    scoring='neg_mean_squared_error',
+    n_jobs=-1
+)
+
+# Train
+grid_search.fit(X_train, y_train)
+
+# Best model
+best_model = grid_search.best_estimator_
+
+# Prediction
+y_pred_best = best_model.predict(X_test)
+
+# RMSE calculation
+rmse_best = np.sqrt(mean_squared_error(y_test, y_pred_best))
+
+print("Best RMSE:", rmse_best)
+
+import pandas as pd
+
+results = pd.DataFrame({
+    'Model': [
+        'Linear Regression',
+        'Decision Tree',
+        'Random Forest',
+        'Tuned Random Forest'
+    ],
+    'RMSE': [
+        rmse_lr,
+        rmse_dt,
+        rmse_rf,
+        rmse_best
+    ]
+})
+
+results
