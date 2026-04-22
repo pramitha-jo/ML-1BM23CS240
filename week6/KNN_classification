@@ -1,0 +1,36 @@
+#KNN-clasification
+import numpy as np
+from collections import Counter
+
+# Euclidean distance
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+# KNN Classifier
+def knn_classification(X_train, y_train, X_test, k):
+    predictions = []
+
+    for test_point in X_test:
+        distances = []
+        for i in range(len(X_train)):
+            dist = euclidean_distance(test_point, X_train[i])
+            distances.append((dist, y_train[i]))
+
+        # Sort by distance
+        distances.sort(key=lambda x: x[0])
+
+        # Get k nearest labels
+        k_neighbors = [label for _, label in distances[:k]]
+
+        # Majority vote
+        most_common = Counter(k_neighbors).most_common(1)
+        predictions.append(most_common[0][0])
+
+    return predictions
+
+# Example
+X_train = np.array([[1,2], [2,3], [3,3], [6,5]])
+y_train = np.array(['A', 'A', 'B', 'B'])
+X_test = np.array([[2,2]])
+
+print("Predicted Class:", knn_classification(X_train, y_train, X_test, k=3))
