@@ -1,0 +1,61 @@
+# CART Regression using two standard datasets
+
+import numpy as np
+from sklearn.datasets import load_diabetes, fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# Function to train and evaluate model
+def evaluate_dataset(name, X, y):
+
+    print("\n==============================")
+    print("Dataset:", name)
+    print("==============================")
+
+    # Train test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    # CART Regression Model
+    model = DecisionTreeRegressor(max_depth=5, random_state=42)
+
+    # Training
+    model.fit(X_train, y_train)
+
+    # Prediction
+    y_pred = model.predict(X_test)
+
+    # Metrics
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_test, y_pred)
+
+    # Print results
+    print("MAE :", mae)
+    print("MSE :", mse)
+    print("RMSE:", rmse)
+    print("R2 Score:", r2)
+
+
+# -----------------------
+# Dataset 1: Diabetes
+# -----------------------
+diabetes = load_diabetes()
+X1 = diabetes.data
+y1 = diabetes.target
+
+evaluate_dataset("Diabetes Dataset", X1, y1)
+
+
+# -----------------------
+# Dataset 2: California Housing
+# -----------------------
+housing = fetch_california_housing()
+
+X2 = housing.data
+y2 = housing.target
+
+evaluate_dataset("California Housing Dataset", X2, y2)
