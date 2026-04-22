@@ -1,0 +1,17 @@
+import pandas as pd
+from sklearn.cluster import KMeans
+
+# Load CSV
+data = pd.read_csv("data.csv")
+
+# Use numeric columns
+X = data.select_dtypes(include='number')
+
+# Apply k-means
+kmeans = KMeans(n_clusters=3, random_state=42)
+data['Cluster'] = kmeans.fit_predict(X)
+
+# Save result
+data.to_csv("clustered_output.csv", index=False)
+
+print("Centroids:\n", kmeans.cluster_centers_)
