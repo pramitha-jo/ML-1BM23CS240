@@ -1,0 +1,97 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import plot_tree
+from sklearn import metrics
+from sklearn.preprocessing import StandardScaler
+
+# Load Titanic dataset
+titanic = sns.load_dataset('titanic')
+
+# Check first few rows
+titanic.head()
+# Select relevant columns
+titanic = titanic[['sex', 'age', 'fare', 'survived']]
+
+# Handle missing values
+titanic['age'].fillna(titanic['age'].median(), inplace=True)
+
+# Convert categorical 'sex' column to numeric (male=0, female=1)
+titanic['sex'] = titanic['sex'].map({'male': 0, 'female': 1})
+
+# Check the preprocessed dataset
+titanic.head()
+X_titanic = titanic[['sex', 'age', 'fare']]  # Features
+y_titanic = titanic['survived']  # Target
+# Train-test split for Titanic dataset
+X_train_titanic, X_test_titanic, y_train_titanic, y_test_titanic = train_test_split(
+    X_titanic, y_titanic, test_size=0.3, random_state=42
+)
+# Train ID3 decision tree using entropy
+clf_titanic = DecisionTreeClassifier(criterion='entropy', max_depth=4)
+clf_titanic.fit(X_train_titanic, y_train_titanic)
+# Make predictions
+y_pred_titanic = clf_titanic.predict(X_test_titanic)
+
+# Evaluate accuracy
+accuracy_titanic = metrics.accuracy_score(y_test_titanic, y_pred_titanic)
+print("Titanic Accuracy:", accuracy_titanic)
+# Visualize the decision tree
+plt.figure(figsize=(12,8))
+plot_tree(clf_titanic, feature_names=X_titanic.columns, class_names=['Not Survived', 'Survived'], filled=True, fontsize=10, max_depth=2)
+plt.show()
+new_sample_titanic = np.array([[1, 0, 30, 50]])
+
+# Predict survival for new passenger
+prediction_titanic = clf_titanic.predict(new_sample_titanic)
+print("Titanic Prediction:", "Survived" if prediction_titanic[0] == 1 else "Not Survived")
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# Load Pima Indians Diabetes dataset
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+column_names = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
+diabetes = pd.read_csv(url, names=column_names)
+
+# Check first few rows
+diabetes.head()
+# Define features and target
+X_diabetes = diabetes.drop('Outcome', axis=1)
+y_diabetes = diabetes['Outcome']
+
+# Normalize the data (StandardScaler)
+scaler = StandardScaler()
+X_diabetes_scaled = scaler.fit_transform(X_diabetes)
+
+# Check the scaled data
+pd.DataFrame(X_diabetes_scaled, columns=X_diabetes.columns).head()
+# Train-test split for Pima Indians Diabetes dataset
+X_train_diabetes, X_test_diabetes, y_train_diabetes, y_test_diabetes = train_test_split(
+    X_diabetes_scaled, y_diabetes, test_size=0.3, random_state=42
+)
+# Train ID3 decision tree using entropy
+clf_diabetes = DecisionTreeClassifier(criterion='entropy', max_depth=4)
+clf_diabetes.fit(X_train_diabetes, y_train_diabetes)
+y_pred_diabetes = clf_diabetes.predict(X_test_diabetes)
+accuracy_diabetes = metrics.accuracy_score(y_test_diabetes, y_pred_diabetes)
+print("Pima Indians Diabetes Accuracy:", accuracy_diabetes)
+# Visualize the decision tree with larger text and adjusted figure size
+plt.figure(figsize=(30, 10))  # Adjust figure size for better fit
+plot_tree(clf_diabetes,
+          feature_names=X_diabetes.columns,
+          class_names=['No Diabetes', 'Diabetes'],
+          filled=True,
+          #max_depth=1,  # Limit tree depth
+          fontsize=12)  # Increase font size for better readability
+plt.show()
+new_sample_diabetes = np.array([[2, 150, 80, 30, 130, 32, 0.5, 40]])
+
+# Predict diabetes outcome for new sample
+prediction_diabetes = clf_diabetes.predict(new_sample_diabetes)
+print("Pima Diabetes Prediction:", "Has Diabetes" if prediction_diabetes[0] == 1 else "No Diabetes")
+
