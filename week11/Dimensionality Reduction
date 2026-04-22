@@ -1,0 +1,38 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Step 1: Load dataset from CSV file
+data = pd.read_csv("data.csv")
+
+# Step 2: Select numeric columns
+X = data.select_dtypes(include=['number'])
+
+# Step 3: Standardize the data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Step 4: Apply PCA
+pca = PCA(n_components=2)   # Reduce to 2 dimensions
+X_pca = pca.fit_transform(X_scaled)
+
+# Step 5: Create DataFrame for reduced data
+pca_df = pd.DataFrame(data=X_pca, columns=['PC1', 'PC2'])
+
+# Step 6: Save output
+pca_df.to_csv("pca_output.csv", index=False)
+
+# Step 7: Print results
+print("Reduced Dataset:")
+print(pca_df)
+
+print("\nExplained Variance Ratio:")
+print(pca.explained_variance_ratio_)
+
+import matplotlib.pyplot as plt
+
+plt.scatter(X_pca[:,0], X_pca[:,1])
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.title("PCA Result")
+plt.show()
