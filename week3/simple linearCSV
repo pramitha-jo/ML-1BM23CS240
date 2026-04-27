@@ -1,0 +1,40 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# 📁 Step 1: Load dataset from CSV file
+# Make sure your CSV file has columns like:
+# Hours_Studied, Marks
+df = pd.read_csv("your_dataset.csv")   # 👈 change file name here
+
+print("Dataset Preview:")
+print(df)
+
+# 📊 Step 2: Define Independent and Dependent variables
+X = df[['Hours_Studied']]   # Independent variable (must be 2D)
+y = df['Marks']             # Dependent variable
+
+# 🤖 Step 3: Create and train model
+model = LinearRegression()
+model.fit(X, y)
+
+# 🔮 Step 4: Prediction
+predicted_marks = model.predict(X)
+print("\nPredicted Marks:")
+print(predicted_marks)
+
+# 📈 Step 5: Visualization
+plt.scatter(X, y, color='blue', label="Actual Data")
+plt.plot(X, predicted_marks, color='red', label="Regression Line")
+plt.xlabel("Hours Studied")
+plt.ylabel("Marks")
+plt.title("Linear Regression from CSV Data")
+plt.legend()
+plt.show()
+
+# 📐 Step 6: Model parameters
+print("\nSlope (m):", model.coef_[0])
+print("Intercept (c):", model.intercept_)
+
+--------------------------------------------------------------------------------------------------------
