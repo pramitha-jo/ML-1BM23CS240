@@ -32,3 +32,55 @@ y_train = np.array([2, 4, 6, 8, 10])
 X_test = np.array([[3.5]])
 
 print("Predicted Value:", knn_regression(X_train, y_train, X_test, k=2))
+
+------------------------------------------------------------------------------------------------
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# 📁 Step 1: Load dataset from CSV
+df = pd.read_csv("your_dataset.csv")   # 👈 change file name
+
+print("Dataset Preview:")
+print(df.head())
+
+# 🎯 Step 2: Features & Target
+X = df.iloc[:, :-1].values   # all columns except last
+y = df.iloc[:, -1].values    # last column as target
+
+# ✂️ Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 📐 Euclidean Distance
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+# 🤖 KNN Regression Function
+def knn_regression(X_train, y_train, X_test, k=3):
+    predictions = []
+
+    for test_point in X_test:
+        distances = []
+
+        for i in range(len(X_train)):
+            dist = euclidean_distance(test_point, X_train[i])
+            distances.append((dist, y_train[i]))
+
+        # 📊 Sort by distance
+        distances.sort(key=lambda x: x[0])
+
+        # 🔍 Take k nearest values
+        k_values = [value for _, value in distances[:k]]
+
+        # 📌 Regression = AVERAGE of neighbors
+        predictions.append(np.mean(k_values))
+
+    return np.array(predictions)
+
+# 🔮 Prediction
+y_pred = knn_regression(X_train, y_train, X_test, k=3)
+
+print("\nPredicted Values:", y_pred)
+print("Actual Values:", y_test)
